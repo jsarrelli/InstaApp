@@ -1,12 +1,13 @@
 package com.boliche.proyecto.Bolichongo;
 
 
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
-import javax.swing.JLabel;
 import java.awt.Font;
+
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JProgressBar;
+import javax.swing.border.EmptyBorder;
 
 @SuppressWarnings("serial")
 public class LoginFrame extends JFrame {

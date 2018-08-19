@@ -1,34 +1,26 @@
 package com.boliche.proyecto.Bolichongo;
 
-import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.EventQueue;
+import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.List;
 
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
+import javax.swing.JTextField;
+import javax.swing.JTextPane;
+import javax.swing.SwingWorker;
 import javax.swing.border.EmptyBorder;
 
 import org.brunocvcunha.instagram4j.Instagram4j;
-import org.brunocvcunha.instagram4j.requests.InstagramUserFeedRequest;
-import org.brunocvcunha.instagram4j.requests.payload.InstagramFeedResult;
 import org.brunocvcunha.instagram4j.requests.payload.InstagramUserSummary;
-
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JButton;
-
-
-import java.awt.event.ActionListener;
-import java.io.IOException;
-import java.util.List;
-import java.awt.event.ActionEvent;
-import javax.swing.JTextField;
-import javax.swing.ImageIcon;
-import javax.swing.JTextPane;
-import javax.swing.SwingWorker;
-
-import java.awt.Color;
-import java.awt.Font;
-import javax.swing.JProgressBar;
 
 @SuppressWarnings("serial")
 public class MainFrame extends JFrame {
@@ -59,8 +51,8 @@ public class MainFrame extends JFrame {
 					SwingWorker<Boolean, Void> worker = new SwingWorker<Boolean, Void>() {
 						protected Boolean doInBackground() throws Exception {
 
-							plataforma=Plataforma.getInstance(status);
-							plataforma.iniciarSesion("spinners.ba", "camimiamor");
+							plataforma=Plataforma.getInstance();
+							plataforma.iniciarSesion("ninabelgrano", "estrella1");
 							user=plataforma.getInstagram();
 							return true;
 						}
@@ -131,7 +123,7 @@ public class MainFrame extends JFrame {
 		lblImagen.setBounds(6, 6, 131, 131);
 		contentPane.add(lblImagen);
 
-		robarbtn = new JButton("Robar Seguidores");
+		robarbtn = new JButton("Obtener Seguidores");
 		robarbtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 
@@ -145,7 +137,7 @@ public class MainFrame extends JFrame {
 					protected Boolean doInBackground() throws Exception {
 
 
-						usuariosRobados=plataforma.getSeguidores(usuarioRobado.getText());
+						usuariosRobados=plataforma.getFollowers(plataforma.userResult(usuarioRobado.getText()).getUser().getPk());
 						return true;
 
 					}
@@ -198,7 +190,7 @@ public class MainFrame extends JFrame {
 				int dialogResult = JOptionPane.showConfirmDialog (null, "Esta seguro que desea enviar este mensaje?","Confirme", dialogButton);
 				if(dialogResult == JOptionPane.YES_OPTION){
 					status.setVisible(true);
-					plataforma.enviarMensajeUsuarios(usuariosRobados,mensaje.getText());
+					plataforma.enviarMensajeUsuarios(usuariosRobados,mensaje.getText(),status);
 				}
 			}
 		});
@@ -218,7 +210,7 @@ public class MainFrame extends JFrame {
 				int dialogResult = JOptionPane.showConfirmDialog (null, "Esta seguro que desea enviar este comentario?","Confirme", dialogButton);
 				if(dialogResult == JOptionPane.YES_OPTION){
 					status.setVisible(true);
-					plataforma.comentarFotos(usuariosRobados,mensaje.getText());
+					plataforma.comentarFotos(usuariosRobados,mensaje.getText(),status);
 				}
 				
 			}
@@ -231,7 +223,7 @@ public class MainFrame extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				ListadoSeguidores listado=new ListadoSeguidores(usuariosRobados,usuarioRobado.getText());
 				listado.setVisible(true);
-
+				
 
 			}
 		});
