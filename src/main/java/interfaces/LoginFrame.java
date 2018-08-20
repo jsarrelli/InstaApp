@@ -1,4 +1,4 @@
-package com.boliche.proyecto.Bolichongo;
+package interfaces;
 
 
 import java.awt.Font;
@@ -20,7 +20,7 @@ public class LoginFrame extends JFrame {
 	 */
 	public LoginFrame() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 300, 100);
+		setBounds(500, 400, 300, 100);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);

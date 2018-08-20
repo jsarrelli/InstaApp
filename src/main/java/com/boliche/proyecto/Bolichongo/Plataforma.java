@@ -5,8 +5,6 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.SwingWorker;
 
 import org.brunocvcunha.instagram4j.Instagram4j;
@@ -25,10 +23,15 @@ import org.brunocvcunha.instagram4j.requests.payload.InstagramGetUserFollowersRe
 import org.brunocvcunha.instagram4j.requests.payload.InstagramSearchUsernameResult;
 import org.brunocvcunha.instagram4j.requests.payload.InstagramUserSummary;
 
+import interfaces.ListadoSeguidores;
+import interfaces.MainFrame;
+
 public class Plataforma {
 
 	private static Plataforma INSTANCE;
 	private static int counter;
+	private static int longbreak;
+
 
 
 	Instagram4j instagram;
@@ -76,21 +79,8 @@ public class Plataforma {
 	}
 
 
-
 	public void setInstagram(Instagram4j instagram) {
 		this.instagram = instagram;
-	}
-
-
-
-	public static int getCounter() {
-		return counter;
-	}
-
-
-
-	public static void setCounter(int counter) {
-		Plataforma.counter = counter;
 	}
 
 
@@ -186,13 +176,25 @@ public class Plataforma {
 		return users;
 	}
 
+	private List<String> getFollowersUsername(long pk) {
+
+		List<String> users =new ArrayList<>();
+		List<InstagramUserSummary> followers = getFollowers(pk);
+		for(InstagramUserSummary user:followers)
+		{
+
+			users.add(user.getUsername());
+		}
 
 
-	public void comentarFoto(String usuario,String mensaje)
+		return users;
+	}
+
+	public void comentarFoto(long pk,String mensaje)
 	{
 		InstagramFeedResult result = null;
 		try {
-			result = instagram.sendRequest(new InstagramUserFeedRequest(userResult(usuario).getUser().getPk()));
+			result = instagram.sendRequest(new InstagramUserFeedRequest(pk));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -213,128 +215,82 @@ public class Plataforma {
 
 	}
 
-	private void comentarFoto(InstagramUserSummary user, String mensaje) {
-		InstagramFeedResult result = null;
-		try {
-			result = instagram.sendRequest(new InstagramUserFeedRequest(user.getPk()));
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		for (InstagramFeedItem item : result.getItems()) 
-		{
-			try {
-				instagram.sendRequest(new InstagramPostCommentRequest(item.getPk(), mensaje));
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-
-			break;
-		}
-
-	}
 
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public void mandarMensaje(String usuario,String mensaje)
+	public void mandarMensaje(long userPk,String mensaje)
 	{
 
-		InstagramSearchUsernameResult user= userResult(usuario);
+		ArrayList<String> recipients = new ArrayList<String>();
 
-		System.out.println(user.getUser().getUsername());
-		ArrayList recipients = new ArrayList();
-
-		String id= Long.toString(user.getUser().getPk());
+		String id= Long.toString(userPk);
 		recipients.add(id);
-		System.out.println(user.getUser().getPk());
-
-
-		try {
-			instagram.sendRequest(InstagramDirectShareRequest.builder(ShareType.MESSAGE, recipients).message(mensaje).build());
-
-		} catch (IOException e) {
-			System.out.println("No se pudo enviar el mensaje a "+ user.getUser().getUsername());
-			e.printStackTrace();
-		}
-	}
-
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public void mandarMensaje(InstagramUserSummary usuario,String mensaje)
-	{
-
-		ArrayList recipients = new ArrayList();
-
-		recipients.add(usuario.getPk());
-
+		//System.out.println(user.getUser().getPk());
+		
 
 		try {
 			instagram.sendRequest(InstagramDirectShareRequest.builder(ShareType.MESSAGE, recipients).message(mensaje).build());
 
 		} catch (IOException e) {
-			System.out.println("No se pudo enviar el mensaje a "+ usuario.getUsername());
+			//System.out.println("No se pudo enviar el mensaje a "+ userResult(usuario);
+			System.out.println("algo paso");
 			e.printStackTrace();
 		}
 	}
 
 
+	public void enviar(final List<InstagramUserSummary> usuariosRobados, final List<String> mensajes,int index,final boolean DM) {
 
-	public void enviarMensajeUsuarios(List<InstagramUserSummary> usuariosRobados, String mensaje,JLabel status) {
+		counter=index+1;
 
-		int countNumber=0;
-		int cantidad= usuariosRobados.size();
+		final int cantidad= usuariosRobados.size();
 
-		for(InstagramUserSummary user: usuariosRobados)
+		for(int i=index;i<usuariosRobados.size();i++)
 		{
+			
+			final int j=generarRandom(mensajes.size());
+			final InstagramUserSummary user=usuariosRobados.get(i);
 
-			mandarMensaje(user, mensaje);
-			status.setText("Enviados "+ countNumber +" de "+ cantidad+". Mensaje enviado a: "+ user.getUsername());
+			SwingWorker<Boolean, Void> worker = new SwingWorker<Boolean, Void>() {
+				protected Boolean doInBackground() throws Exception {
+					
+					//o es un Direct Message o hay que comentar las fotos
+				
+					if(DM)mandarMensaje(user.getPk(), mensajes.get(j));
+					else comentarFoto(user.getPk(), mensajes.get(j));
+					return true;
 
-			//espera entre 60 y 90 segundos.
-			espera(60000,30000);
+				}
+
+				protected void done()
+				{
+					if(DM)MainFrame.status.setText("Enviados "+ counter +"/"+ cantidad+". Mensaje enviado a: "+ user.getUsername());
+					else MainFrame.status.setText("Comentados "+ counter +"/"+ cantidad+". Comentado a: "+ user.getUsername());
+
+				}
+
+			};
+			worker.execute();
+			
+	
+			//espera entre 80 y 120 segundos.
+			espera(80000,40000);
+			
+		
+			if(longbreak==50){
+				//cuando mande 50 espera 10 minutos
+				espera(500000,100000);
+				longbreak=0;
+			}
+			counter++;
+			longbreak++;
 		}
 
 	}
 
 
-	public void espera(int minimo, int margen){
-
-		try {
-			Thread.sleep((long)(generarRandom(margen)+minimo));
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
 
 
-	public int generarRandom(int margen)
-	{
-
-		SecureRandom sr = new SecureRandom();
-		sr.nextBytes(new byte[1]);
-
-		return sr.nextInt(margen);
-	}
-
-
-
-	public void comentarFotos(List<InstagramUserSummary> usuariosRobados, String mensaje,JLabel status) {
-		int countNumber=0;
-		int cantidad= usuariosRobados.size();
-
-		for(InstagramUserSummary user: usuariosRobados)
-		{
-
-			comentarFoto(user, mensaje);
-			status.setText("Comentados "+ countNumber +" de "+ cantidad+". Comentado a: "+ user.getUsername());
-
-			//espera entre 60 y 90 segundos.
-
-		}
-
-
-	}
+	
 
 
 
@@ -345,7 +301,7 @@ public class Plataforma {
 		List<String> following=getFollowingUsername(instagram.getUserId());
 		//System.out.println(following.size());
 		//System.out.println(following.contains(userResult("julisarrelli").getUser().getUsername()));
-	   
+
 		final int size=usuariosRobados.size();
 		counter=0;
 		for(final InstagramUserSummary user:usuariosRobados)
@@ -390,7 +346,7 @@ public class Plataforma {
 
 		final int size=usuariosRobados.size();
 		counter=0;
-		
+
 		for(final InstagramUserSummary user:usuariosRobados)
 		{
 
@@ -431,7 +387,7 @@ public class Plataforma {
 
 		final int size=usuariosRobados.size();
 		counter=0;
-		
+
 		for(final InstagramUserSummary user:usuariosRobados)
 		{
 
@@ -462,19 +418,27 @@ public class Plataforma {
 
 
 
-	private List<String> getFollowersUsername(long pk) {
 
-		List<String> users =new ArrayList<>();
-		List<InstagramUserSummary> followers = getFollowers(pk);
-		for(InstagramUserSummary user:followers)
-		{
+	public void espera(int minimo, int margen){
 
-			users.add(user.getUsername());
+		try {
+			Thread.sleep((long)(generarRandom(margen)+minimo));
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-
-
-		return users;
 	}
+
+
+	public int generarRandom(int margen)
+	{
+
+		SecureRandom sr = new SecureRandom();
+		sr.nextBytes(new byte[1]);
+
+		return sr.nextInt(margen);
+	}
+
 
 
 
