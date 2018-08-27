@@ -77,7 +77,6 @@ public class ListadoSeguidores extends JFrame {
 		list.setVisibleRowCount(10);
 		list.setBounds(25, 40, 335, 150);
 		list.setSize(400,150);
-		//contentPane.add(list);
 
 		menuScrollPane = new JScrollPane(list);
 		menuScrollPane.setBounds(25, 40, 335, 150);

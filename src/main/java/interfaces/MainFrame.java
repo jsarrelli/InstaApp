@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.imageio.ImageIO;
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -52,10 +53,11 @@ public class MainFrame extends JFrame {
 	private static MainFrame frame;
 	private static int index=0;
 	private JTextField indexText;
-	private JTextField txtCantidadMaxima;
-	private JRadioButton rdbtnLocation,rdbtnFollowers,rdbtnFollowing;
+	private JTextField txtDelimiter;
+	private JRadioButton rdbtnListaUsuarios,rdbtnFollowers,rdbtnFollowing;
 	private JRadioButton rdbtnComentarFotos;
 	private JRadioButton rdbtnEnviarMensaje;
+	private JLabel lblNewLabel;
 
 	/**
 	 * Launch the application.
@@ -74,7 +76,7 @@ public class MainFrame extends JFrame {
 						protected Boolean doInBackground() throws Exception {
 
 							plataforma=Plataforma.getInstance();
-							plataforma.iniciarSesion("spinners.ba", "camimiamor");
+							plataforma.iniciarSesion("ninabelgrano", "estrella1");
 							user=plataforma.getInstagram();
 							return true;
 						}
@@ -183,10 +185,12 @@ public class MainFrame extends JFrame {
 
 
 					protected Boolean doInBackground() throws Exception {
+						
 
 
 						if(rdbtnFollowers.isSelected())usuariosRobados=plataforma.getFollowers(plataforma.userResult(usuarioRobado.getText()).getUser().getPk());
 						else if(rdbtnFollowing.isSelected())usuariosRobados=plataforma.getFollowing(plataforma.userResult(usuarioRobado.getText()).getUser().getPk());
+						else if (rdbtnListaUsuarios.isSelected())usuariosRobados=plataforma.usuariosLista(usuarioRobado.getText(),txtDelimiter.getText());
 						return true;
 
 					}
@@ -243,8 +247,8 @@ public class MainFrame extends JFrame {
 					//cargo los mensajes
 					final List<String> mensajes=new ArrayList<>();
 					if(!mensaje1.getText().isEmpty()||!mensaje1.getText().equals("Escriba aqui el mensaje N1")) mensajes.add(mensaje1.getText());
-					else if(!mensaje2.getText().isEmpty()||!mensaje2.getText().equals("Escriba aqui el mensaje N2")) mensajes.add(mensaje2.getText());
-					else if(!mensaje3.getText().isEmpty()||!mensaje3.getText().equals("Escriba aqui el mensaje N3")) mensajes.add(mensaje3.getText());
+					if(!mensaje2.getText().isEmpty()||!mensaje2.getText().equals("Escriba aqui el mensaje N2")) mensajes.add(mensaje2.getText());
+					if(!mensaje3.getText().isEmpty()||!mensaje3.getText().equals("Escriba aqui el mensaje N3")) mensajes.add(mensaje3.getText());
 
 					//el indice por default es 0
 					if(indexText.getText().isEmpty()) index=0;
@@ -255,8 +259,12 @@ public class MainFrame extends JFrame {
 
 						protected Boolean doInBackground() throws Exception {
 						
+							
 							if(rdbtnEnviarMensaje.isSelected())plataforma.enviar(usuariosRobados, mensajes,index,true);
 							else if(rdbtnComentarFotos.isSelected())plataforma.enviar(usuariosRobados, mensajes,index,false);
+							
+							
+						
 							return true;
 
 						}
@@ -314,8 +322,8 @@ public class MainFrame extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				rdbtnFollowing.setSelected(false);
-				rdbtnLocation.setSelected(false);
-				txtCantidadMaxima.setVisible(false);
+				rdbtnListaUsuarios.setSelected(false);
+				txtDelimiter.setVisible(false);
 				
 
 			}
@@ -329,8 +337,8 @@ public class MainFrame extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				rdbtnFollowers.setSelected(false);
-				rdbtnLocation.setSelected(false);
-				txtCantidadMaxima.setVisible(false);
+				rdbtnListaUsuarios.setSelected(false);
+				txtDelimiter.setVisible(false);
 				
 
 			}
@@ -338,27 +346,28 @@ public class MainFrame extends JFrame {
 		
 		contentPane.add(rdbtnFollowing);
 		
-		rdbtnLocation = new JRadioButton("Location");
-		rdbtnLocation.setBounds(511, 103, 141, 23);
-		rdbtnLocation.addActionListener(new ActionListener() {
+		rdbtnListaUsuarios = new JRadioButton("Lista");
+		rdbtnListaUsuarios.setBounds(511, 103, 141, 23);
+		rdbtnListaUsuarios.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				rdbtnFollowing.setSelected(false);
 				rdbtnFollowers.setSelected(false);
-				txtCantidadMaxima.setVisible(true);
+				txtDelimiter.setVisible(true);
 				
 
 			}
 		});
-		contentPane.add(rdbtnLocation);
+		contentPane.add(rdbtnListaUsuarios);
 		
-		txtCantidadMaxima = new JTextField();
-		txtCantidadMaxima.setText("Cantidad Maxima");
-		txtCantidadMaxima.setBounds(502, 138, 130, 26);
-		txtCantidadMaxima.setVisible(false);
-		contentPane.add(txtCantidadMaxima);
-		txtCantidadMaxima.setColumns(10);
+		txtDelimiter = new JTextField();
+		txtDelimiter.setHorizontalAlignment(SwingConstants.CENTER);
+		txtDelimiter.setText("Separador");
+		txtDelimiter.setBounds(502, 138, 130, 26);
+		txtDelimiter.setVisible(false);
+		contentPane.add(txtDelimiter);
+		txtDelimiter.setColumns(10);
 		
 		rdbtnComentarFotos = new JRadioButton("Comentar Fotos");
 		rdbtnComentarFotos.setBounds(207, 264, 153, 23);
@@ -404,11 +413,14 @@ public class MainFrame extends JFrame {
 		mensaje3.setBounds(502, 298, 181, 82);
 		contentPane.add(mensaje3);
 		
+
 		
 		JLabel background = new JLabel("");
 		background.setIcon(new ImageIcon(MainFrame.class.getResource("/resources/background.jpg")));
 		background.setBounds(0, 0, 700, 572);
 		contentPane.add(background);
+		
+		
 		
 
 		

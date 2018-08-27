@@ -30,7 +30,6 @@ public class Plataforma {
 
 	private static Plataforma INSTANCE;
 	private static int counter;
-	private static int longbreak;
 
 
 
@@ -39,11 +38,7 @@ public class Plataforma {
 	private Plataforma() {
 
 		this.instagram=null;
-
-
 	}
-
-
 
 	public static Plataforma getInstance() {
 
@@ -271,28 +266,22 @@ public class Plataforma {
 			};
 			worker.execute();
 			
-	
+			if(DM)espera(100,480000);
 			//espera entre 80 y 120 segundos.
-			espera(80000,40000);
+			else espera(80000,40000);
 			
 		
-			if(longbreak==50){
-				//cuando mande 50 espera 10 minutos
-				espera(500000,100000);
-				longbreak=0;
+			if(counter%30==0){
+				//cuando mande 30 espera 10 minutos
+				espera(1800*1000,100000);
+				
 			}
 			counter++;
-			longbreak++;
 		}
 
 	}
-
-
-
-
 	
-
-
+	
 
 	public void SeguirUsuarios(List<InstagramUserSummary> usuariosRobados) {
 
@@ -313,6 +302,7 @@ public class Plataforma {
 
 					protected Boolean doInBackground() throws Exception {
 						instagram.sendRequest(new InstagramFollowRequest(user.getPk()));
+						
 						return true;
 
 					}
@@ -378,7 +368,8 @@ public class Plataforma {
 
 
 	}
-
+	
+	
 
 	public void DejarSeguirNoTeSiguen(List<InstagramUserSummary> usuariosRobados) {
 		ListadoSeguidores.estado.setVisible(true);
@@ -438,6 +429,41 @@ public class Plataforma {
 
 		return sr.nextInt(margen);
 	}
+
+
+
+	public List<InstagramUserSummary> usuariosLista(String text,String delimiter) {
+		
+		String[] usernames= text.split(delimiter);
+		
+		List<InstagramUserSummary> usuariosDestinatarios=new ArrayList<>();
+		InstagramUserSummary userSummary;
+		
+		for(String username: usernames)
+		{
+			InstagramSearchUsernameResult user = userResult(username);
+			userSummary= new InstagramUserSummary();
+			
+			userSummary.set_verified(user.getUser().is_verified());
+			userSummary.setProfile_pic_id(user.getUser().getProfile_pic_id());
+			userSummary.set_favorite(user.getUser().is_favorite());
+			userSummary.set_private(user.getUser().is_private());
+			userSummary.setUsername(user.getUser().getUsername());
+			userSummary.setPk(user.getUser().getPk());
+			userSummary.setProfile_pic_url(user.getUser().getProfile_pic_url());
+			userSummary.setHas_anonymous_profile_picture(user.getUser().isHas_anonymous_profile_picture());
+			userSummary.setFull_name(user.getUser().getFull_name());
+			
+			usuariosDestinatarios.add(userSummary);
+			
+		}
+		
+		return usuariosDestinatarios;
+	}
+
+
+
+
 
 
 
